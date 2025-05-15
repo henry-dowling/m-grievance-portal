@@ -33,12 +33,18 @@ function Login({ onLogin }: { onLogin: (username: string) => void }) {
   );
 }
 
-function GrievanceForm({ onSubmit, username }: { onSubmit: (g: any) => void, username: string }) {
+function GrievanceForm({ onSubmit, username, onLogout }: { onSubmit: (g: any) => void, username: string, onLogout: () => void }) {
   const [grievance, setGrievance] = useState("");
   const [mood, setMood] = useState("😡");
   const [severity, setSeverity] = useState(2);
   return (
-    <div className="bg-pink-100 rounded-xl p-8 shadow-lg flex flex-col items-center max-w-sm mx-auto mt-16">
+    <div className="bg-pink-100 rounded-xl p-8 shadow-lg flex flex-col items-center max-w-sm mx-auto mt-16 relative">
+      <button
+        className="absolute top-4 right-4 text-pink-500 hover:text-pink-700 text-sm underline"
+        onClick={onLogout}
+      >
+        Logout
+      </button>
       <h2 className="text-2xl font-bold mb-2 text-pink-700">Welcome to the Grievance Portal, {username}</h2>
       <p className="mb-4 text-pink-600">Pls submit grievance here</p>
       <textarea className="mb-2 p-2 rounded border w-full" placeholder="What's bothering you?" value={grievance} onChange={e => setGrievance(e.target.value)} />
@@ -64,9 +70,15 @@ function GrievanceForm({ onSubmit, username }: { onSubmit: (g: any) => void, use
   );
 }
 
-function ThankYou({ onAnother, username }: { onAnother: () => void, username: string }) {
+function ThankYou({ onAnother, username, onLogout }: { onAnother: () => void, username: string, onLogout: () => void }) {
   return (
-    <div className="bg-pink-100 rounded-xl p-8 shadow-lg flex flex-col items-center max-w-sm mx-auto mt-16">
+    <div className="bg-pink-100 rounded-xl p-8 shadow-lg flex flex-col items-center max-w-sm mx-auto mt-16 relative">
+      <button
+        className="absolute top-4 right-4 text-pink-500 hover:text-pink-700 text-sm underline"
+        onClick={onLogout}
+      >
+        Logout
+      </button>
       <h2 className="text-2xl font-bold mb-2 text-pink-700">Thank you, {username} 💖</h2>
       <p className="mb-4 text-pink-600">Your grievance has been sent to Henry 💌<br/>He will get back to you asap depending on severity level<br/></p>
       <button className="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600 mt-2" onClick={onAnother}>
@@ -100,7 +112,12 @@ export default function Home() {
     setSubmitted(false);
   }
 
+  function handleLogout() {
+    setUsername(null);
+    localStorage.removeItem("meia-username");
+  }
+
   if (!username) return <Login onLogin={handleLogin} />;
-  if (submitted) return <ThankYou onAnother={handleAnother} username={username} />;
-  return <GrievanceForm onSubmit={handleSubmit} username={username} />;
+  if (submitted) return <ThankYou onAnother={handleAnother} username={username} onLogout={handleLogout} />;
+  return <GrievanceForm onSubmit={handleSubmit} username={username} onLogout={handleLogout} />;
 }
