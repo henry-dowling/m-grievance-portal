@@ -23,7 +23,7 @@ function Login({ onLogin }: { onLogin: (username: string) => void }) {
   }
   return (
     <div className="bg-white/80 rounded-3xl p-10 shadow-2xl flex flex-col items-center max-w-sm mx-auto mt-24 animate-fadein border border-pink-200 backdrop-blur-md">
-      <h2 className="text-3xl font-extrabold mb-2 text-pink-700 flex items-center gap-2">Meia's Grievance Portal <span>💌</span></h2>
+      <h2 className="text-3xl font-extrabold mb-2 text-pink-700 flex items-center gap-2">Meia&apos;s Grievance Portal <span>💌</span></h2>
       <p className="mb-6 text-pink-600 text-lg">Log in to submit your grievances! <span>✨</span></p>
       <input
         className="mb-3 p-3 rounded-xl border border-pink-200 w-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all text-lg bg-white/70 placeholder-pink-300"
