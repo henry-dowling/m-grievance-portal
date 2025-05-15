@@ -2,6 +2,14 @@
 import { useState, useEffect } from "react";
 import Head from 'next/head';
 
+interface Grievance {
+  grievance: string;
+  mood: string;
+  severity: number;
+  date: string;
+  username?: string;
+}
+
 function Login({ onLogin }: { onLogin: (username: string) => void }) {
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
@@ -34,7 +42,7 @@ function Login({ onLogin }: { onLogin: (username: string) => void }) {
   );
 }
 
-function GrievanceForm({ onSubmit, username, onLogout }: { onSubmit: (g: any) => void, username: string, onLogout: () => void }) {
+function GrievanceForm({ onSubmit, username, onLogout }: { onSubmit: (g: Grievance) => void, username: string, onLogout: () => void }) {
   const [grievance, setGrievance] = useState("");
   const [mood, setMood] = useState("😡");
   const [severity, setSeverity] = useState(2);
@@ -48,7 +56,7 @@ function GrievanceForm({ onSubmit, username, onLogout }: { onSubmit: (g: any) =>
       </button>
       <h2 className="text-3xl font-extrabold mb-2 text-pink-700 flex items-center gap-2">Welcome, {username} <span>👋</span></h2>
       <p className="mb-4 text-pink-600 text-lg">Pls submit grievance here <span>📝</span></p>
-      <textarea className="mb-3 p-3 rounded-xl border border-pink-200 w-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all text-lg bg-white/70 placeholder-pink-300 min-h-[80px]" placeholder="What's bothering you?" value={grievance} onChange={e => setGrievance(e.target.value)} />
+      <textarea className="mb-3 p-3 rounded-xl border border-pink-200 w-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all text-lg bg-white/70 placeholder-pink-300 min-h-[80px]" placeholder="What&apos;s bothering you?" value={grievance} onChange={e => setGrievance(e.target.value)} />
       <div className="mb-3 w-full flex items-center justify-between">
         <label className="font-semibold">Mood:</label>
         <select value={mood} onChange={e => setMood(e.target.value)} className="rounded-xl p-2 border border-pink-200 bg-white/70 focus:ring-2 focus:ring-pink-400 transition-all text-lg">
@@ -105,7 +113,7 @@ export default function Home() {
     localStorage.setItem("meia-username", name);
   }
 
-  async function handleSubmit(grievanceObj: any) {
+  async function handleSubmit(grievanceObj: Grievance) {
     setLoading(true);
     setError(null);
     try {
@@ -120,7 +128,7 @@ export default function Home() {
       const prev = JSON.parse(localStorage.getItem("meia-grievances") || "[]");
       localStorage.setItem("meia-grievances", JSON.stringify([...prev, { ...grievanceObj, username }]));
       setSubmitted(true);
-    } catch (err) {
+    } catch {
       setError('Failed to submit grievance. Please try again.');
     } finally {
       setLoading(false);
