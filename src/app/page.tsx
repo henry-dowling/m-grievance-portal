@@ -152,7 +152,6 @@ export default function Home() {
       <style jsx global>{`
         html, body {
           min-height: 100vh;
-          background: linear-gradient(135deg, #ffe0f7 0%, #fbeaff 50%, #ffe5ec 100%);
           font-family: 'Poppins', sans-serif;
         }
         * {
