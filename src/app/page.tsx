@@ -92,6 +92,8 @@ function ThankYou({ onAnother, username, onLogout }: { onAnother: () => void, us
 export default function Home() {
   const [username, setUsername] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("meia-username");
@@ -103,10 +105,26 @@ export default function Home() {
     localStorage.setItem("meia-username", name);
   }
 
-  function handleSubmit(grievanceObj: any) {
-    const prev = JSON.parse(localStorage.getItem("meia-grievances") || "[]");
-    localStorage.setItem("meia-grievances", JSON.stringify([...prev, { ...grievanceObj, username }]));
-    setSubmitted(true);
+  async function handleSubmit(grievanceObj: any) {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/submit-grievance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...grievanceObj, username }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to send grievance');
+      }
+      const prev = JSON.parse(localStorage.getItem("meia-grievances") || "[]");
+      localStorage.setItem("meia-grievances", JSON.stringify([...prev, { ...grievanceObj, username }]));
+      setSubmitted(true);
+    } catch (err) {
+      setError('Failed to submit grievance. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleAnother() {
@@ -143,6 +161,8 @@ export default function Home() {
       {!username && <Login onLogin={handleLogin} />}
       {username && submitted && <ThankYou onAnother={handleAnother} username={username} onLogout={handleLogout} />}
       {username && !submitted && <GrievanceForm onSubmit={handleSubmit} username={username} onLogout={handleLogout} />}
+      {loading && <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-white/70 z-50"><div className="bg-pink-100 p-6 rounded-xl shadow-lg text-pink-700 font-bold text-lg">Submitting...</div></div>}
+      {error && <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-red-100 text-red-700 px-4 py-2 rounded-xl shadow-lg font-semibold">{error}</div>}
     </>
   );
 }
