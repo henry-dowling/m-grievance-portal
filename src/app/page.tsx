@@ -42,10 +42,11 @@ function Login({ onLogin }: { onLogin: (username: string) => void }) {
   );
 }
 
-function GrievanceForm({ onSubmit, username, onLogout }: { onSubmit: (g: Grievance) => void, username: string, onLogout: () => void }) {
+function GrievanceForm({ onSubmit, username, onLogout }: { onSubmit: (g: Grievance, file?: File) => void, username: string, onLogout: () => void }) {
   const [grievance, setGrievance] = useState("");
   const [mood, setMood] = useState("😡");
   const [severity, setSeverity] = useState(2);
+  const [file, setFile] = useState<File | null>(null);
   return (
     <div className="bg-white/80 rounded-3xl p-10 shadow-2xl flex flex-col items-center max-w-sm mx-auto mt-24 relative animate-fadein border border-pink-200 backdrop-blur-md">
       <button
@@ -67,12 +68,40 @@ function GrievanceForm({ onSubmit, username, onLogout }: { onSubmit: (g: Grievan
           <option>😂</option>
         </select>
       </div>
+      <div className="mb-3 w-full flex items-center justify-between">
+        <label className="font-semibold">Screenshot:</label>
+        <div className="flex items-center gap-2 w-full justify-end">
+          <input
+            id="screenshot-upload"
+            type="file"
+            accept="image/*"
+            onChange={e => setFile(e.target.files?.[0] || null)}
+            style={{ display: 'none' }}
+          />
+          <label
+            htmlFor="screenshot-upload"
+            className="flex items-center gap-1 bg-white/70 border border-pink-200 text-pink-600 px-3 py-1 rounded-lg cursor-pointer font-semibold shadow-sm hover:bg-pink-100 hover:text-pink-700 transition-all text-base"
+            title="Upload a screenshot"
+          >
+            <span role="img" aria-label="camera">📷</span>
+            <span>{file ? 'Change' : 'Upload'}</span>
+          </label>
+          {file && (
+            <span
+              className="bg-pink-100 text-pink-700 px-2 py-1 rounded-full text-xs max-w-[120px] truncate shadow-sm border border-pink-200"
+              title={file.name}
+            >
+              {file.name}
+            </span>
+          )}
+        </div>
+      </div>
       <div className="mb-6 w-full flex items-center justify-between">
         <label className="font-semibold">Severity:</label>
         <input type="range" min={1} max={5} value={severity} onChange={e => setSeverity(Number(e.target.value))} className="accent-pink-500 w-32" />
         <span className="ml-2 font-bold text-pink-600 text-lg">{severity}</span>
       </div>
-      <button className="bg-gradient-to-r from-pink-400 to-pink-600 text-white px-6 py-3 rounded-xl hover:scale-105 hover:shadow-lg transition-all font-bold text-lg shadow-pink-200 w-full flex items-center justify-center gap-2" onClick={() => grievance && onSubmit({ grievance, mood, severity, date: new Date().toISOString() })}>
+      <button className="bg-gradient-to-r from-pink-400 to-pink-600 text-white px-6 py-3 rounded-xl hover:scale-105 hover:shadow-lg transition-all font-bold text-lg shadow-pink-200 w-full flex items-center justify-center gap-2" onClick={() => grievance && onSubmit({ grievance, mood, severity, date: new Date().toISOString() }, file || undefined)}>
         Submit Grievance <span>📨</span>
       </button>
     </div>
@@ -113,14 +142,20 @@ export default function Home() {
     localStorage.setItem("meia-username", name);
   }
 
-  async function handleSubmit(grievanceObj: Grievance) {
+  async function handleSubmit(grievanceObj: Grievance, file?: File) {
     setLoading(true);
     setError(null);
     try {
+      const formData = new FormData();
+      formData.append('grievance', grievanceObj.grievance);
+      formData.append('mood', grievanceObj.mood);
+      formData.append('severity', grievanceObj.severity.toString());
+      formData.append('date', grievanceObj.date);
+      if (username) formData.append('username', username);
+      if (file) formData.append('screenshot', file);
       const response = await fetch('/api/submit-grievance', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...grievanceObj, username }),
+        body: formData,
       });
       if (!response.ok) {
         throw new Error('Failed to send grievance');
